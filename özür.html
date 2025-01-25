@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Özür Dileme Uygulaması</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Helvetica', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #message {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        #acceptButton {
+            font-size: 1em;
+            font-weight: bold;
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">Her şey için çok özür dilerim güzeller güzeli sevgilimmmm</h1>
+        <canvas id="heartCanvas" width="500" height="300"></canvas>
+        <p id="message">Affet Lütfen</p>
+        <button id="acceptButton">Affettim</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        const messageLabel = document.getElementById('message');
+        const acceptButton = document.getElementById('acceptButton');
+
+        let animationRunning = false;
+
+        const heartSize = 120;
+        const heartX = 250;
+        const heartY = 150;
+        const outlineColor = 'pink';
+        const fillColor = 'pink';
+
+
+       function drawHeartCurve(x, y, size, color, outlineColor, fillColor, fill = false) {
+            ctx.beginPath();
+            const points = [];
+            for (let i = 0; i < 200; i++) {
+                const t = i / 100 * Math.PI;
+                const dx = 16 * Math.pow(Math.sin(t), 3);
+                const dy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                
+                const pointX = x + size * dx / 16;
+                const pointY = y - size * dy / 16;
+                points.push({ x: pointX, y: pointY });
+
+            }
+                ctx.moveTo(points[0].x, points[0].y);
+                 for (const point of points) {
+                    ctx.lineTo(point.x, point.y);
+                }
+            
+            ctx.closePath();
+            if (fill) {
+                ctx.fillStyle = fillColor;
+                ctx.strokeStyle = outlineColor;
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.strokeStyle = outlineColor;
+                ctx.stroke();
+            }
+        }
+
+        function animateHeartFill(x, y, size, outlineColor, fillColor, messageLabel, acceptButton) {
+            animationRunning = true;
+            const points = [];
+            for (let i = 0; i < 200; i++) {
+                const t = i / 100 * Math.PI;
+                const dx = 16 * Math.pow(Math.sin(t), 3);
+                const dy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                
+                const pointX = x + size * dx / 16;
+                const pointY = y - size * dy / 16;
+                 points.push({ x: pointX, y: pointY });
+            }
+            
+            let currentFillPercentage = 0;
+             const animation = setInterval(() => {
+                if (!animationRunning) {
+                    clearInterval(animation)
+                    return;
+                }
+                 ctx.clearRect(0,0, canvas.width, canvas.height)
+                 drawDecorations()
+                if (currentFillPercentage >= 100) {
+                    clearInterval(animation);
+                    messageLabel.textContent = "Seni seviyorum <3";
+                    acceptButton.textContent = "Affettiğin için teşekkür ederim";
+                      ctx.clearRect(0,0, canvas.width, canvas.height)
+                      drawDecorations()
+                    drawHeartCurve(x, y, size, 'white', outlineColor, fillColor, true)
+                    animateHeartGlow(x, y, size, outlineColor, fillColor,5)
+                    return;
+                }
+                
+                  ctx.clearRect(0,0, canvas.width, canvas.height)
+                  drawDecorations()
+                const fillPoints = points.slice(0, Math.floor(points.length * currentFillPercentage / 100));
+                 ctx.beginPath()
+                  if (fillPoints.length > 0){
+                       ctx.moveTo(fillPoints[0].x, fillPoints[0].y)
+                       for (const point of fillPoints) {
+                           ctx.lineTo(point.x, point.y);
+                       }
+                       ctx.closePath()
+                       ctx.fillStyle = fillColor;
+                       ctx.strokeStyle = outlineColor
+                       ctx.fill();
+                       ctx.stroke()
+                  }
+                currentFillPercentage++;
+           },10);
+         }
+       
+         function stopAnimation() {
+              animationRunning = false;
+         }
+
+        function animateHeartGlow(x, y, size, outlineColor, fillColor, numGlows) {
+            let glowCount = 0;
+            const glowInterval = setInterval(() => {
+                if (glowCount >= numGlows) {
+                     clearInterval(glowInterval);
+                     return
+                  }
+                for (let j = 0; j < 2; j++) {
+                    ctx.clearRect(0,0, canvas.width, canvas.height)
+                     drawDecorations()
+                    if (j === 0) {
+                       drawHeartCurve(x, y, size, 'white', outlineColor, 'pink', true)
+                    } else {
+                        drawHeartCurve(x, y, size, 'white', outlineColor, fillColor, true)
+                    }
+                    
+                }
+                glowCount++;
+              }, 100);
+           }
+
+
+        function drawFlower(x, y, size, color) {
+            const numPetals = Math.floor(Math.random() * (12 - 7 + 1) + 7);
+            const angleOffset = Math.random() * 2 * Math.PI;
+            for (let i = 0; i < numPetals; i++) {
+                const angle = (2 * Math.PI / numPetals) * i + angleOffset;
+                const petalXOffset = size * Math.cos(angle);
+                const petalYOffset = size * Math.sin(angle);
+                
+                const petalPoints = [];
+                for (let j = 0; j < 20; j++) {
+                    const t = j / 19 * Math.PI;
+                    const radiusRatio = 0.7 + Math.random() * 0.5;
+                    const petalX = x + petalXOffset * radiusRatio * Math.cos(t * 1.5 + Math.PI / 2) * Math.sin(t / 2 * 3);
+                    const petalY = y + petalYOffset * radiusRatio * Math.sin(t * 1.5 + Math.PI / 2) * Math.cos(t / 2 * 3);
+                    petalPoints.push({x:petalX, y:petalY});
+                }
+                  ctx.beginPath();
+                   ctx.moveTo(petalPoints[0].x, petalPoints[0].y);
+                     for (const point of petalPoints) {
+                           ctx.lineTo(point.x, point.y);
+                       }
+                      ctx.closePath()
+                    ctx.fillStyle = color;
+                   ctx.fill();
+            }
+            ctx.beginPath();
+             ctx.arc(x, y, size / 3, 0, 2 * Math.PI);
+              ctx.fillStyle = 'yellow';
+             ctx.fill();
+           
+        }
+
+         function drawSadCat(x, y, size, color) {
+             const faceSize = size * 0.7;
+             const eyeSize = faceSize * 0.15;
+             const earSize = faceSize * 0.3;
+             const noseSize = faceSize * 0.08;
+
+             ctx.beginPath();
+             ctx.ellipse(x,y, faceSize, faceSize, 0, 0, 2 * Math.PI);
+             ctx.fillStyle = "white"
+              ctx.strokeStyle = color;
+              ctx.fill()
+               ctx.stroke();
+                
+                
+             ctx.beginPath();
+             ctx.moveTo(x - faceSize * 0.7, y - faceSize * 0.9);
+             ctx.lineTo(x - faceSize * 0.3, y - faceSize * 1.6);
+              ctx.lineTo(x - faceSize * 0.1, y - faceSize * 1.1);
+               ctx.closePath()
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = color;
+             ctx.fill();
+               ctx.stroke();
+
+             ctx.beginPath();
+            ctx.moveTo(x + faceSize * 0.7, y - faceSize * 0.9);
+            ctx.lineTo(x + faceSize * 0.3, y - faceSize * 1.6);
+            ctx.lineTo(x + faceSize * 0.1, y - faceSize * 1.1);
+                ctx.closePath()
+               ctx.fillStyle = "white";
+            ctx.strokeStyle = color;
+            ctx.fill();
+            ctx.stroke();
+
+            
+           ctx.beginPath()
+             ctx.ellipse(x - faceSize / 2.5, y - faceSize / 4, eyeSize, eyeSize/2, 0, 0, 2 * Math.PI);
+           ctx.fillStyle = "black";
+              ctx.fill();
+              ctx.beginPath()
+               ctx.ellipse(x + faceSize / 2.5, y - faceSize / 4, eyeSize, eyeSize/2, 0, 0, 2 * Math.PI);
+               ctx.fillStyle = "black";
+              ctx.fill();
+        
+            ctx.beginPath()
+           ctx.moveTo(x - noseSize/1.2, y + faceSize / 5)
+           ctx.lineTo(x, y+ faceSize / 4)
+           ctx.lineTo(x + noseSize/1.2, y + faceSize / 5)
+           ctx.closePath()
+           ctx.fillStyle = "pink"
+           ctx.fill()
+           
+           
+           ctx.beginPath();
+            ctx.arc(x,y+ faceSize/2.7,faceSize/2.4,0,Math.PI)
+            ctx.strokeStyle = "black";
+             ctx.stroke()
+        }
+
+          function drawDecorations() {
+              const emojiPositions = [
+                 { x:30, y:30 }, { x:470, y:30 }, { x:30, y:270 }, { x:470, y:270 }, {x:250, y:30}
+                ];
+                
+               const flowerPositions = [
+                    {x:70, y:70}, {x:430, y:70}, {x:70, y:230}, {x:430, y:230}, {x:250, y:230}, {x:20, y:120}, {x:480, y:120}
+                ];
+                
+                for (const pos of emojiPositions) {
+                     drawSadCat(pos.x,pos.y,20,"white");
+                }
+               for (const pos of flowerPositions) {
+                   drawFlower(pos.x, pos.y, 15, 'red')
+                }
+
+        }
+
+         drawHeartCurve(heartX, heartY, heartSize, 'white', outlineColor, '', false);
+         drawDecorations();
+         acceptButton.addEventListener('click', () => animateHeartFill(heartX, heartY, heartSize, outlineColor, fillColor, messageLabel, acceptButton));
+
+    </script>
+</body>
+</html>
